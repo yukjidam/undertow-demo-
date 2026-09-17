@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Real-time worlds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400;12..96,75..100,800&family=Instrument+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="cursor-hidden">
+
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<header>
+  <button class="mark" data-cursor="top" data-scramble data-alt="UNDERTOW/01">Ron Chi</button>
+  <nav>
+    <button data-goto="work" data-scramble data-alt="12 nodes">Work</button>
+    <button data-goto="lab" data-scramble data-alt="7 sketches">Lab</button>
+    <button data-goto="studio" data-scramble data-alt="Gothenburg">Studio</button>
+    <button data-goto="contact" data-scramble data-alt="open channel">Contact</button>
+  </nav>
+  <button class="sound" id="sound" aria-pressed="false">
+    <span class="bars"><i></i><i></i><i></i><i></i></span><span id="soundLbl">sound off</span>
+  </button>
+</header>
+
+<div id="viewport">
+  <div id="scroller">
+    <div id="content">
+      <main class="wrap">
+        <section class="hero" id="s-top">
+          <h1>
+            <span class="ln"><i data-alt="You let go of">I build worlds</i></span>
+            <span class="ln"><i data-alt="the surface.">that render</i></span>
+            <span class="ln"><i data-alt="Keep holding.">themselves.</i></span>
+          </h1>
+          <div class="sub">
+            <p data-alt="Everything here is one frame deep. The page you were reading is still there, on the other side of the membrane.">Real-time graphics, installations and shaders. Ten years of making light behave, for screens you touch and rooms you walk into.</p>
+            <span class="hold-hint"><span class="dot"></span><b data-alt="release to surface">press and hold anywhere</b></span>
+          </div>
+        </section>
+
+        <section id="s-work">
+          <p class="eyebrow rv"><span data-alt="/ render targets">Selected work</span><span data-alt="click to open">eight of twenty-two</span></p>
+          <div class="rows" id="rows"></div>
+        </section>
+
+        <section id="s-lab">
+          <p class="eyebrow rv"><span data-alt="/ scratch buffer">Lab</span><span data-alt="inertia on">drag sideways</span></p>
+          <div class="rail" id="rail"></div>
+          <p class="rail-hint rv" data-alt="everything above is drawn per frame, nothing is a video">Sketches that exist only to teach me one thing each.</p>
+        </section>
+
+        <section id="s-studio">
+          <p class="eyebrow rv"><span data-alt="/ who is typing">Studio</span></p>
+          <div class="studio">
+            <p class="rv" data-alt="I mostly sit in the dark and move numbers until the light looks right.">I'm Ron, a graphics engineer and artist working out of a small studio in Gothenburg.</p>
+            <p class="rv" data-alt="The failed ones taught more: a projector that fell over, a shader that ran at 4fps on opening night, a room nobody wanted to enter.">I started in demoscene intros, spent six years at an agency shipping WebGL for brands, then went independent. Now I split my time between client work and pieces that don't have to justify themselves.</p>
+            <p class="rv" data-alt="Come look at the broken ones too.">Most of what I know came from <a href="#s-lab" data-cursor="lab">breaking things in public</a>. If you have something strange you'd like built, I'd like to hear about it.</p>
+            <div class="stats rv">
+              <span><b data-alt="∞">22</b>shipped projects</span>
+              <span><b data-alt="16.6ms">10</b>years in real-time</span>
+              <span><b data-alt="one">4</b>continents installed on</span>
+            </div>
+          </div>
+        </section>
+
+        <section id="s-contact" class="contact">
+          <p class="eyebrow rv"><span data-alt="/ still holding?">Contact</span></p>
+          <a class="big rv" href="#s-contact" data-cursor="mail" data-alt="Come back up for air">Let's make something move</a>
+          <div class="links rv">
+            <a href="#s-contact" data-cursor="copy" data-alt="hello@">Email</a>
+            <a href="#s-contact" data-cursor="open" data-alt="@ronchii">X</a>
+            <a href="#s-contact" data-cursor="open" data-alt="/in/ronchii">LinkedIn</a>
+            <a href="#s-contact" data-cursor="open" data-alt="ronchii.art">Art</a>
+          </div>
+        </section>
+      </main>
+      <div class="marquee"><div class="track" id="track"></div></div>
+      <div class="wrap">
+        <footer>
+          <span data-alt="dimension B">Gothenburg, 57.7°N</span>
+          <span data-alt="G grid · M sound · SPACE hold">Fictional portfolio · built as a demo</span>
+        </footer>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="spacer"></div>
+
+<div id="worldB" aria-hidden="true"><div id="worldBInner"></div></div>
+
+<div id="thumb"><canvas></canvas></div>
+
+<div id="progress"><i></i></div>
+<div id="gridlines"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+<div id="hud">
+  <span>dim <b id="hudDim">surface</b></span>
+  <span>xy <b id="hudXY">0,0</b></span>
+  <span>fps <b id="hudFps">60</b></span>
+  <span>vel <b id="hudVel">0.0</b></span>
+</div>
+
+<div id="panel" aria-hidden="true" role="dialog" aria-modal="true">
+  <button class="close" id="panelClose" data-cursor="close">Close</button>
+  <div class="inner" id="panelInner"></div>
+</div>
+
+<div id="cursor">
+  <div class="ring"></div>
+  <svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="22" stroke-dasharray="138.2" stroke-dashoffset="138.2"></circle></svg>
+  <span class="dotc"></span><span class="lbl"></span>
+</div>
+
+<div id="loader">
+  <span class="count" id="loadCount">0</span>
+  <span id="loadMsg">compiling shaders</span>
+  <span class="bar"><i id="loadBar"></i></span>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
