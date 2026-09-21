@@ -1,5 +1,5 @@
 var VS_SRC='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
-var FS_SRC='precision highp float;\nuniform vec2 uRes;uniform vec2 uMouse;uniform float uTime;uniform float uHold;\nuniform float uRadius;uniform float uScroll;uniform float uWave;uniform float uHover;\nuniform float uVel;uniform float uAudio;uniform float uBoot;\nfloat hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}\nfloat noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);\n  float a=hash(i),b=hash(i+vec2(1.,0.)),c=hash(i+vec2(0.,1.)),d=hash(i+vec2(1.,1.));\n  return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}\nfloat fbm(vec2 p){float v=0.0,a=0.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);\n  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p;a*=0.5;}return v;}\nvoid main(){\n  vec2 frag=gl_FragCoord.xy;\n  vec2 uv=(frag-0.5*uRes)/uRes.y;\n  float t=uTime;\n  vec2 mp=vec2(uMouse.x,uRes.y-uMouse.y);\n  vec2 d=frag-mp;float dist=length(d);\n  vec2 dir=dist>0.001?d/dist:vec2(0.,1.);\n  float rad=max(uRadius,1.0);\n  float dd=dist/rad;\n  dd+=(noise(dir*7.0+t*0.35)-0.5)*0.045;\n  float lens=smoothstep(1.35,1.0,dd)*smoothstep(0.55,1.0,dd);\n\n  vec2 p=uv*1.9;\n  p+=dir*lens*0.34*uHold;\n  p.y+=uScroll*0.45;\n  p.y+=uVel*0.06;\n  p.x+=uVel*0.03*sin(uv.y*3.0);\n  // cursor makes a soft dent in the field even when not holding\n  float near=smoothstep(0.55,0.0,length(uv-(mp-0.5*uRes)/uRes.y));\n  p+=dir*near*0.05;\n\n  vec2 q=vec2(fbm(p+vec2(0.0,t*0.05)),fbm(p+vec2(5.2,1.3)));\n  vec2 r=vec2(fbm(p+3.4*q+vec2(1.7,9.2)+t*0.07),fbm(p+3.4*q+vec2(8.3,2.8)-t*0.05));\n  float f=fbm(p+3.6*r);\n  float warp=length(r);\n\n  vec3 pale=vec3(0.906,0.925,0.906);\n  vec3 deep=vec3(0.549,0.612,0.580);\n  vec3 A=mix(deep,pale,smoothstep(0.25,0.85,f+0.12*warp));\n  float bands=abs(fract(f*8.5+t*0.015)-0.5);\n  float contour=smoothstep(0.045,0.004,bands);\n  A=mix(A,vec3(0.117,0.176,0.145),contour*(0.30+uHover*0.22+uAudio*0.15));\n  A*=1.0-0.28*smoothstep(0.55,1.35,length(uv));\n\n  float g=pow(clamp(f*1.25,0.0,1.0),2.3);\n  vec3 B=mix(vec3(0.031,0.023,0.031),vec3(0.180,0.043,0.063),g);\n  float sp=t*0.30+uAudio*0.6;\n  float fr=abs(fract(f*13.0-sp)-0.5);\n  float fgc=abs(fract(f*13.0-sp+0.010)-0.5);\n  float fb=abs(fract(f*13.0-sp+0.022)-0.5);\n  vec3 fil=vec3(smoothstep(0.03,0.0,fr),smoothstep(0.03,0.0,fgc),smoothstep(0.03,0.0,fb));\n  B+=fil*vec3(1.0,0.36,0.17)*(0.55+0.65*g+uAudio*0.5);\n  B+=smoothstep(0.80,1.0,warp)*vec3(0.37,0.89,0.78)*0.55;\n  B*=1.0-0.42*smoothstep(0.35,1.30,length(uv));\n\n  float mask=smoothstep(1.0,0.955,dd)*step(0.001,uHold);\n  vec3 col=mix(A,B,mask);\n  float rim=smoothstep(0.075,0.0,abs(dd-1.0))*uHold*(1.0-smoothstep(0.985,1.0,uHold));\n  col+=rim*vec3(1.0,0.42,0.20)*0.85;\n  if(uWave<1.0){\n    float wr=uWave*max(uRes.x,uRes.y)*1.15;\n    float ring=smoothstep(26.0,0.0,abs(dist-wr));\n    col+=ring*(1.0-uWave)*vec3(1.0,0.55,0.30)*0.45;\n  }\n  col+=(hash(frag+fract(t)*97.0)-0.5)*0.045;\n  col=mix(vec3(0.667,0.706,0.682),col,uBoot);   // boot fade-in\n  gl_FragColor=vec4(col,1.0);\n}';
+var FS_SRC='precision highp float;\nuniform vec2 uRes;uniform vec2 uMouse;uniform float uTime;uniform float uHold;\nuniform float uRadius;uniform float uScroll;uniform float uWave;uniform float uHover;\nuniform float uVel;uniform float uAudio;uniform float uBoot;\nfloat hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}\nfloat noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);\n  float a=hash(i),b=hash(i+vec2(1.,0.)),c=hash(i+vec2(0.,1.)),d=hash(i+vec2(1.,1.));\n  return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}\nfloat fbm(vec2 p){float v=0.0,a=0.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);\n  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p;a*=0.5;}return v;}\nvoid main(){\n  vec2 frag=gl_FragCoord.xy;\n  vec2 uv=(frag-0.5*uRes)/uRes.y;\n  float t=uTime;\n  vec2 mp=vec2(uMouse.x,uRes.y-uMouse.y);\n  vec2 d=frag-mp;float dist=length(d);\n  vec2 dir=dist>0.001?d/dist:vec2(0.,1.);\n  float rad=max(uRadius,1.0);\n  float dd=dist/rad;\n  dd+=(noise(dir*7.0+t*0.35)-0.5)*0.045;\n  float lens=smoothstep(1.35,1.0,dd)*smoothstep(0.55,1.0,dd);\n\n  vec2 p=uv*1.9;\n  p+=dir*lens*0.34*uHold;\n  p.y+=uScroll*0.45;\n  p.y+=uVel*0.06;\n  p.x+=uVel*0.03*sin(uv.y*3.0);\n  // cursor makes a soft dent in the field even when not holding\n  float near=smoothstep(0.55,0.0,length(uv-(mp-0.5*uRes)/uRes.y));\n  p+=dir*near*0.05;\n\n  vec2 q=vec2(fbm(p+vec2(0.0,t*0.05)),fbm(p+vec2(5.2,1.3)));\n  vec2 r=vec2(fbm(p+3.4*q+vec2(1.7,9.2)+t*0.07),fbm(p+3.4*q+vec2(8.3,2.8)-t*0.05));\n  float f=fbm(p+3.6*r);\n  float warp=length(r);\n\n  vec3 pale=vec3(0.906,0.925,0.906);\n  vec3 deep=vec3(0.549,0.612,0.580);\n  vec3 A=mix(deep,pale,smoothstep(0.25,0.85,f+0.12*warp));\n  float bands=abs(fract(f*8.5+t*0.015)-0.5);\n  float contour=smoothstep(0.045,0.004,bands);\n  A=mix(A,vec3(0.117,0.176,0.145),contour*(0.30+uHover*0.22+uAudio*0.15));\n  A*=1.0-0.28*smoothstep(0.55,1.35,length(uv));\n\n  float g=pow(clamp(f*1.25,0.0,1.0),2.3);\n  vec3 B=mix(vec3(0.031,0.023,0.031),vec3(0.180,0.043,0.063),g);\n  float sp=t*0.30+uAudio*0.6;\n  float fr=abs(fract(f*13.0-sp)-0.5);\n  float fgc=abs(fract(f*13.0-sp+0.010)-0.5);\n  float fb=abs(fract(f*13.0-sp+0.022)-0.5);\n  vec3 fil=vec3(smoothstep(0.03,0.0,fr),smoothstep(0.03,0.0,fgc),smoothstep(0.03,0.0,fb));\n  B+=fil*vec3(1.0,0.36,0.17)*(0.55+0.65*g+uAudio*0.5);\n  B+=smoothstep(0.80,1.0,warp)*vec3(0.37,0.89,0.78)*0.55;\n  B*=1.0-0.42*smoothstep(0.35,1.30,length(uv));\n\n  float mask=smoothstep(1.0,0.955,dd)*step(0.001,uHold);\n  vec3 col=mix(A,B,mask);\n  float rim=smoothstep(0.075,0.0,abs(dd-1.0))*uHold*(1.0-smoothstep(0.985,1.0,uHold));\n  col+=rim*vec3(1.0,0.42,0.20)*0.85;\n  // chromatic-aberration fringe right on the portal edge\n  float fringe=smoothstep(0.02,0.0,abs(dd-1.0))*uHold;\n  col.r+=fringe*0.05;col.b-=fringe*0.05;\n  if(uWave<1.0){\n    float wr=uWave*max(uRes.x,uRes.y)*1.15;\n    float ring=smoothstep(26.0,0.0,abs(dist-wr));\n    col+=ring*(1.0-uWave)*vec3(1.0,0.55,0.30)*0.45;\n  }\n  col+=(hash(frag+fract(t)*97.0)-0.5)*0.045;\n  col=mix(vec3(0.667,0.706,0.682),col,uBoot);   // boot fade-in\n  gl_FragColor=vec4(col,1.0);\n}';
 
 (function(){
 "use strict";
@@ -86,6 +86,14 @@ for(var w=0;w<3;w++) words.forEach(function(x){
   var s=document.createElement("span");s.textContent=x;track.appendChild(s);
 });
 
+/* cache true originals up front so later text-swaps (world crossing) and the
+   hover-scramble effect never race each other or lazily cache the wrong text */
+document.querySelectorAll("[data-alt]").forEach(function(el){
+  if(!el.dataset.orig)el.dataset.orig=el.textContent;
+});
+var TPL_HEAD=document.querySelector("header").cloneNode(true);
+var TPL_CONTENT=document.getElementById("content").cloneNode(true);
+
 /* ============ generative art (2D) ============ */
 function rng(seed){var s=seed*9301+49297;return function(){s=(s*9301+49297)%233280;return s/233280;};}
 function n2(x,y,r){ // cheap value noise with seeded hash
@@ -151,15 +159,19 @@ var panelArt=null;
 
 /* ============ world B clone ============ */
 var inner=document.getElementById("worldBInner");
+var side="A"; // which side is currently LIVE on the real, interactive page
 function buildClone(){
+  var target=side==="A"?"B":"A"; // the overlay always previews the side you'd cross INTO
   inner.innerHTML="";
-  var head=document.querySelector("header").cloneNode(true);
-  var c=document.getElementById("content").cloneNode(true);
+  var head=TPL_HEAD.cloneNode(true);
+  var c=TPL_CONTENT.cloneNode(true);
   [head,c].forEach(function(node){
     node.removeAttribute("id");
     node.querySelectorAll("[id]").forEach(function(el){el.removeAttribute("id");});
     node.querySelectorAll("canvas").forEach(function(el){el.parentNode.removeChild(el);});
-    node.querySelectorAll("[data-alt]").forEach(function(el){el.textContent=el.dataset.alt;});
+    node.querySelectorAll("[data-alt]").forEach(function(el){
+      el.textContent=target==="B"?el.dataset.alt:el.dataset.orig;
+    });
     node.querySelectorAll("a,button").forEach(function(el){el.setAttribute("tabindex","-1");});
     node.querySelectorAll(".rv").forEach(function(el){el.classList.add("in");});
   });
@@ -167,7 +179,21 @@ function buildClone(){
   if(oldHead)oldHead.parentNode.removeChild(oldHead);
   worldB.appendChild(head);
   inner.appendChild(c);
-  inner.querySelector(".rail").scrollLeft=rail.scrollLeft;
+  var newRail=inner.querySelector(".rail");
+  if(newRail)newRail.scrollLeft=rail.scrollLeft;
+}
+/* commits a crossing: re-skins the REAL, interactive page (so everything you
+   land on keeps working), then rebuilds the overlay to preview the other way */
+function setSide(s){
+  if(s===side)return;
+  side=s;
+  document.querySelectorAll("[data-alt]").forEach(function(el){
+    el.textContent=s==="B"?el.dataset.alt:el.dataset.orig;
+  });
+  body.classList.toggle("crossed",s==="B");
+  // don't rebuild the overlay yet: it's still fully covering the screen at the
+  // moment a crossing commits, so swapping its content now would flash the
+  // wrong side for a frame. It gets rebuilt once it's actually hidden again.
 }
 
 /* ============ smooth scroll ============ */
@@ -183,19 +209,29 @@ new ResizeObserver(measure).observe(scroller);
 addEventListener("resize",measure);
 
 /* ============ pointer + portal ============ */
-var P={x:innerWidth/2,y:innerHeight/2,tx:innerWidth/2,ty:innerHeight/2,hold:0,target:0,wave:2,hover:0,hoverT:0};
+var P={x:innerWidth/2,y:innerHeight/2,tx:innerWidth/2,ty:innerHeight/2,hold:0,target:0,wave:2,hover:0,hoverT:0,base:0};
 var maxR=Math.hypot(innerWidth,innerHeight)*1.08;
 var body=document.body,worldB=document.getElementById("worldB");
-var holdSuppressed=false;
+var holdSuppressed=false,pressing=false;
 
 addEventListener("pointermove",function(e){P.tx=e.clientX;P.ty=e.clientY;cur.classList.add("on");},{passive:true});
 addEventListener("pointerdown",function(e){
   if(e.button!==undefined&&e.button!==0)return;
   if(e.clientX!==undefined){P.tx=e.clientX;P.ty=e.clientY;}
   if(holdSuppressed)return;
-  P.target=1;P.wave=0;
+  if(e.target.closest&&e.target.closest("#rows,#rail"))return;
+  pressing=true;P.target=1-P.base;P.wave=0;
 });
-function release(){if(P.target===1)P.wave=0;P.target=0;}
+function release(){
+  var wasPressing=pressing&&P.target===(1-P.base);
+  pressing=false;
+  if(wasPressing){
+    var committed=P.base===0?P.hold>0.93:P.hold<0.07;
+    if(committed){setSide(P.base===0?"B":"A");P.base=1-P.base;}
+    P.wave=0;
+  }
+  P.target=P.base;
+}
 addEventListener("pointerup",release);addEventListener("pointercancel",release);addEventListener("blur",release);
 addEventListener("contextmenu",function(e){if(P.target)e.preventDefault();});
 
@@ -206,13 +242,25 @@ var LABELS={open:"open",close:"close",drag:"drag",mail:"say hi",copy:"copy",top:
 document.addEventListener("pointerover",function(e){
   var el=e.target.closest&&e.target.closest("[data-cursor]");
   var m=e.target.closest&&e.target.closest("button,a");
-  magnet=(m&&!m.closest(".rail"))?m:null;
+  magnet=(m&&!m.closest(".rail")&&!m.closest(".row"))?m:null;
   if(el){curLabel=LABELS[el.dataset.cursor]||"";cur.classList.add("label","warm");}
   else{curLabel="";cur.classList.remove("label","warm");}
   curLbl.textContent=curLabel;
 });
 
-/* ============ scramble text ============ */
+/* ============ cursor comet trail (cheap: plain DOM, no shader cost) ============ */
+var trail=[];
+if(!reduce&&!touch){
+  var TRAIL_N=5;
+  for(var ti=0;ti<TRAIL_N;ti++){
+    var td=document.createElement("div");
+    td.className="cursor-trail";
+    td.style.width=td.style.height=(9-ti*1.3)+"px";
+    td.style.opacity=(0.38-ti*0.065).toFixed(2);
+    document.body.appendChild(td);
+    trail.push({el:td,x:P.x,y:P.y});
+  }
+}
 var CH="ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&/*+-<>";
 function scramble(el){
   if(el._scr)return;
@@ -370,7 +418,7 @@ document.querySelectorAll("#scroller .rv").forEach(function(el){io.observe(el);}
 /* ============ keyboard ============ */
 var grid=document.getElementById("gridlines");
 addEventListener("keydown",function(e){
-  if(e.code==="Space"&&!e.repeat&&(e.target===document.body)){e.preventDefault();if(!holdSuppressed){P.target=1;P.wave=0;}}
+  if(e.code==="Space"&&!e.repeat&&(e.target===document.body)){e.preventDefault();if(!holdSuppressed){pressing=true;P.target=1-P.base;P.wave=0;}}
   if(e.key==="g"||e.key==="G")grid.classList.toggle("on");
   if(e.key==="m"||e.key==="M")toggleSound();
   if(e.key==="Escape"&&openIndex>=0)closeProject();
@@ -440,7 +488,7 @@ var hudDim=document.getElementById("hudDim"),hudXY=document.getElementById("hudX
 var fps=60,lastT=performance.now(),acc=0,frames=0;
 
 /* ============ main loop ============ */
-var start=performance.now(),navTick=0;
+var start=performance.now(),navTick=0,wasSettled=true;
 function frame(now){
   var dt=Math.min(64,now-lastT);lastT=now;
   var t=(now-start)/1000*(reduce?0.25:1);
@@ -465,9 +513,15 @@ function frame(now){
   if(P.wave<1)P.wave=Math.min(1,P.wave+0.014);
   var ease=P.hold*P.hold*(3-2*P.hold);
   var radius=ease*maxR;
-  worldB.style.setProperty("--px",P.x+"px");
-  worldB.style.setProperty("--py",P.y+"px");
-  worldB.style.setProperty("--pr",radius+"px");
+  var root=document.documentElement.style;
+  root.setProperty("--px",P.x+"px");
+  root.setProperty("--py",P.y+"px");
+  root.setProperty("--pr",radius+"px");
+  var settled=!pressing&&Math.abs(P.hold-P.base)<0.01;
+  if(settled&&!wasSettled)buildClone();
+  worldB.classList.toggle("settled",settled);
+  viewport.classList.toggle("masking",!settled);
+  wasSettled=settled;
   body.classList.toggle("cursor-hidden",true);
 
   // cursor
@@ -485,10 +539,21 @@ function frame(now){
   curArc.setAttribute("stroke-dashoffset",CIRC*(1-Math.min(P.hold*1.6,1)));
   cur.classList.toggle("hot",ease>0.55);
 
+  if(trail.length){
+    var tgx=P.x,tgy=P.y,show=cur.classList.contains("on");
+    for(var tj=0;tj<trail.length;tj++){
+      var d=trail[tj];
+      d.x=lerp(d.x,tgx,0.32);d.y=lerp(d.y,tgy,0.32);
+      d.el.style.visibility=show?"visible":"hidden";
+      d.el.style.transform="translate3d("+d.x+"px,"+d.y+"px,0) translate(-50%,-50%)";
+      tgx=d.x;tgy=d.y;
+    }
+  }
+
   // thumb
   if(thumbOn||thumb.classList.contains("on")){
     thumbRot=lerp(thumbRot,clamp(SS.vel*0.35+(P.tx-P.x)*0.22,-14,14),0.12);
-    thumb.style.transform="translate3d("+P.x+"px,"+P.y+"px,0) rotate("+thumbRot+"deg)";
+    thumb.style.transform="translate3d("+P.x+"px,"+P.y+"px,0) translate(-50%,-62%) rotate("+thumbRot+"deg)";
     thumbArt.step();
   }
 
